@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Flash Image Generation Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .form-container {
+            flex: 1;
+            min-width: 300px;
+        }
+        .result-container {
+            flex: 1;
+            min-width: 300px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], 
+        input[type="number"], 
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .image-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 500px;
+        }
+        .response-details {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .examples {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .example-prompt {
+            cursor: pointer;
+            color: #3498db;
+            text-decoration: underline;
+            margin-right: 10px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gemini Flash Image Generation Test</h1>
+    <p>This page allows you to test the Gemini 2.0 Flash image generation model through the MCP server.</p>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="generator">Image Generator</div>
+        <div class="tab" data-tab="documentation">Documentation</div>
+    </div>
+
+    <div class="tab-content active" id="generator-tab">
+        <div class="container">
+            <div class="form-container">
+                <h2>Generate Image</h2>
+                <form id="generate-form">
+                    <div class="form-group">
+                        <label for="prompt">Prompt:</label>
+                        <textarea id="prompt" name="prompt" required placeholder="Describe the image you want to generate..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="temperature">Temperature (0.0 to 1.0):</label>
+                        <input type="number" id="temperature" name="temperature" min="0" max="1" step="0.1" value="1.0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="topP">Top P (0.0 to 1.0):</label>
+                        <input type="number" id="topP" name="topP" min="0" max="1" step="0.01" value="0.95">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="topK">Top K:</label>
+                        <input type="number" id="topK" name="topK" min="1" value="40">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="maxOutputTokens">Max Output Tokens:</label>
+                        <input type="number" id="maxOutputTokens" name="maxOutputTokens" min="1" value="8192">
+                    </div>
+                    
+                    <button type="submit">Generate Image</button>
+                </form>
+                
+                <div class="examples">
+                    <h3>Example Prompts:</h3>
+                    <p>
+                        <span class="example-prompt">A sailing boat on Sydney Harbour with the Opera House in the background</span>
+                        <span class="example-prompt">A futuristic cityscape with flying cars and neon lights</span>
+                        <span class="example-prompt">A photorealistic portrait of a smiling woman with curly hair</span>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="result-container">
+                <h2>Result</h2>
+                
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Generating image...</p>
+                </div>
+                
+                <div class="image-container">
+                    <p>Generated image will appear here</p>
+                </div>
+                
+                <h3>Response Details:</h3>
+                <div class="response-details">No response yet</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="documentation-tab">
+        <h2>Documentation</h2>
+        
+        <h3>About Gemini 2.0 Flash</h3>
+        <p>
+            Gemini 2.0 Flash is Google's latest image generation model, capable of creating high-quality images
+            from text descriptions. This test interface allows you to experiment with the model's capabilities
+            through the MCP server.
+        </p>
+        
+        <h3>Parameters</h3>
+        <ul>
+            <li><strong>Prompt</strong>: The text description of the image you want to generate. Be as detailed as possible for best results.</li>
+            <li><strong>Temperature</strong>: Controls randomness in the generation process. Higher values (e.g., 1.0) produce more creative and diverse results, while lower values (e.g., 0.2) produce more focused and deterministic results.</li>
+            <li><strong>Top P</strong>: Controls diversity via nucleus sampling. Lower values make the output more focused and deterministic.</li>
+            <li><strong>Top K</strong>: Controls diversity by limiting the token selection to the top K most likely tokens. Higher values allow for more diversity.</li>
+            <li><strong>Max Output Tokens</strong>: The maximum number of tokens to generate. For image generation, this typically doesn't need to be adjusted.</li>
+        </ul>
+        
+        <h3>Tips for Better Results</h3>
+        <ul>
+            <li>Be specific and detailed in your prompts</li>
+            <li>Include style descriptions (e.g., "photorealistic", "oil painting", "digital art")</li>
+            <li>Specify lighting conditions and perspective</li>
+            <li>Experiment with different temperature values for varying levels of creativity</li>
+        </ul>
+        
+        <h3>MCP Integration</h3>
+        <p>
+            This interface demonstrates the capabilities of the Gemini Flash MCP server, which allows AI assistants
+            like Roo Code to generate images using the Gemini 2.0 Flash model. The server exposes a standardised
+            interface following the Model Context Protocol (MCP) specification.
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateForm = document.getElementById('generate-form');
+            const promptInput = document.getElementById('prompt');
+            const imageContainer = document.querySelector('.image-container');
+            const responseDetails = document.querySelector('.response-details');
+            const loading = document.querySelector('.loading');
+            const examplePrompts = document.querySelectorAll('.example-prompt');
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update active content
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Example prompts
+            examplePrompts.forEach(example => {
+                example.addEventListener('click', function() {
+                    promptInput.value = this.textContent;
+                });
+            });
+            
+            // Form submission
+            generateForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                // Show loading indicator
+                loading.style.display = 'block';
+                imageContainer.innerHTML = '<p>Generating image...</p>';
+                responseDetails.textContent = 'Processing...';
+                
+                // Get form values
+                const formData = {
+                    prompt: promptInput.value,
+                    temperature: parseFloat(document.getElementById('temperature').value),
+                    topP: parseFloat(document.getElementById('topP').value),
+                    topK: parseInt(document.getElementById('topK').value),
+                    maxOutputTokens: parseInt(document.getElementById('maxOutputTokens').value)
+                };
+                
+                try {
+                    // Call the MCP server
+                    const response = await fetch('/mcp/callTool', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            jsonrpc: '2.0',
+                            id: Date.now().toString(),
+                            params: {
+                                name: 'generate_image',
+                                arguments: formData
+                            }
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    // Display response details
+                    responseDetails.textContent = JSON.stringify(data, null, 2);
+                    
+                    // Hide loading indicator
+                    loading.style.display = 'none';
+                    
+                    // Check for errors
+                    if (data.error) {
+                        imageContainer.innerHTML = `<p class="error">Error: ${data.error.message}</p>`;
+                        return;
+                    }
+                    
+                    // Display the generated image
+                    if (data.result && data.result.content) {
+                        const imageContent = data.result.content.find(item => item.type === 'image');
+                        if (imageContent && imageContent.imageUrl) {
+                            imageContainer.innerHTML = `<img src="${imageContent.imageUrl}" alt="Generated image">`;
+                        } else {
+                            imageContainer.innerHTML = '<p>No image was returned in the response</p>';
+                        }
+                    } else {
+                        imageContainer.innerHTML = '<p>Invalid response format</p>';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    responseDetails.textContent = `Error: ${error.message}`;
+                    imageContainer.innerHTML = `<p class="error">Failed to generate image: ${error.message}</p>`;
+                    loading.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
