@@ -1,0 +1,42 @@
+{
+  "name": "gemini-flash-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Google Gemini 2.0 Flash image generation",
+  "main": "build/index.js",
+  "bin": {
+    "gemini-flash-mcp": "build/index.js",
+    "gemini-flash-mcp-install": "build/install.js"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "start": "node build/index.js",
+    "dev": "tsc-watch --onSuccess \"node build/index.js\"",
+    "test": "node test-gemini.js",
+    "install-mcp": "node build/install.js"
+  },
+  "keywords": [
+    "mcp",
+    "gemini",
+    "google",
+    "ai",
+    "image",
+    "generation",
+    "roo-code"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.2.0",
+    "axios": "^1.6.2",
+    "express": "^4.18.2",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.10.0",
+    "tsc-watch": "^6.0.4",
+    "typescript": "^5.3.2"
+  }
+}
