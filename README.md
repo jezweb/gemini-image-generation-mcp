@@ -2,6 +2,9 @@
 
 This project provides a Model Context Protocol (MCP) server for connecting to Google's Gemini 2.0 Flash image generation model. It's specifically designed to work with Roo Code and other MCP-compatible AI assistants.
 
+# Gemini Flash MCP - Image Generation for Roo Code
+Currently testing and trying to resolve some issues with the Gemini API. Code may not be functional sorry!
+
 ## Overview
 
 This MCP server provides a tool for Gemini 2.0 Flash image generation with comprehensive support for all available API options. It allows AI assistants like Roo Code to generate images through the Model Context Protocol (MCP) with fine-grained control over the generation process.
